@@ -22,20 +22,8 @@ class sudoku_solver():
         self.peers = dict((s, set(sum(self.units[s],[])) - set([s])) for s in self.boxes)
 
         self.values_dict = self.grid_values(grid)
-    
-    def solve(self):
-        stalled = False
-        while not stalled:
-            solved_values_before = len([box for box in self.values_dict.keys() if len(self.values_dict[box]) == 1])
-            self.values_dict = self.eliminate(self.values_dict)
-            self.values_dict = self.only_choice(self.values_dict)
-            solved_values_after = len([box for box in self.values_dict.keys() if len(self.values_dict[box]) == 1])
-            stalled = solved_values_before == solved_values_after
-            # Sanity check, return False if there is a box with zero available values:
-            if len([box for box in self.values_dict.keys() if len(self.values_dict[box]) == 0]):
-                return False
 
-    def grid_values(self, values_string):
+    def grid_values(self, grid):
         """Convert a sudoku grid to a dictionary form.
         Args:
             values_string: A sudoku grid in string form, '.' for empty boxes
@@ -43,7 +31,7 @@ class sudoku_solver():
             A sudoku in dictonary form. A1:value; value is a number or '123456789' for empty boxes. 
         """
         numbers = '123456789'
-        return {values[0]: numbers if values[1] == '.' else values[1] for values in zip(self.boxes, values_string)}
+        return {values[0]: numbers if values[1] == '.' else values[1] for values in zip(self.boxes, grid)}
 
     def eliminate(self, values):
         """Performs elimination of possible values from peers
@@ -56,8 +44,8 @@ class sudoku_solver():
         solved_boxes = [box for box in self.boxes if len(values[box]) == 1]
         for box in solved_boxes:
             for peer in self.peers[box]:
-                if len(values[peer]) > 1:
-                    values[peer] = values[peer].replace(values[box], "")
+                values[peer] = values[peer].replace(values[box], '')
+        return values
 
         # Solution 1; without the peers dictionary
         # solved_boxes = [box for box in self.boxes if len(values_dictionary[box]) == 1]
@@ -89,6 +77,49 @@ class sudoku_solver():
                     values[dplaces[0]] = digit
         return values
 
+    def reduce_solution(self, values):
+        stalled = False
+        while not stalled:
+            solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+            values = self.eliminate(values)
+            values = self.only_choice(values)
+            solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+            stalled = solved_values_before == solved_values_after
+            # Sanity check, return False if there is a box with zero available values:
+            if len([box for box in values.keys() if len(values[box]) == 0]):
+                return False
+        return values
+
+    def search(self, values):
+        values = self.reduce_solution(values)
+        if values is False:
+            return False
+        if all(len(values[s]) == 1 for s in self.boxes):
+            return values 
+
+        # # This adds all the boxes to the search; could potentially be slower
+        # unsolved_boxes = {v[0]:v[1] for v in values.items() if len(v[1]) > 1}
+        # sorted_uboxes = sorted(unsolved_boxes.items(), key=lambda x: int(x[1]))
+        # for box in sorted_uboxes:
+        #     for value in values[box[0]]:
+        #         new_values = values.copy()
+        #         new_values[box[0]] = value
+        #         attempt = self.search(new_values)
+        #         if attempt:
+        #             return attempt
+        # # Proposed solution; the heuristic to only consider the minimum box of each grid helps speed it up by reducing the amount of searches.
+        n,s = min([len(values[s]),s] for s in self.boxes if len(values[s]) > 1)
+        # # Now use recurrence to solve each one of the resulting sudokus, and 
+        for value in values[s]:
+            new_sudoku = values.copy()
+            new_sudoku[s] = value
+            attempt = self.search(new_sudoku)
+            if attempt:
+                return attempt
+
+    def solve(self):
+        self.values_dict = self.search(self.values_dict)
+
     def display(self, values = {}):
         """Displays a grid"""
         values = self.grid_values(values) if len(values) > 1 else self.values_dict
@@ -105,15 +136,8 @@ if __name__ == '__main__':
     solver.solve()
     solver.display()
 
+    print()
+
     solver2 = sudoku_solver('4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......')
     solver2.solve()
     solver2.display()
-    # solver.display(solver.only_choice(solver.eliminate(solver.grid_values('..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'))))
-
-    # list1 = [[1, 2, 3, 4], [2,3,4,5],[3,4,5,6]]
-    # possible_values = set()
-    # for v in list1:
-    #     possible_values.update(v)
-    # print(possible_values)
-
-
