@@ -1,0 +1,93 @@
+AI Nanodegree
+----------------
+
+Anaconda
+--------
+
+- Using anaconda and python3 for the projects.
+
+- With Anaconda, it's simple to install the packages you'll often use in data science work. 
+
+- Conda is both a package manager and an environment manager. You can set up environments with different package versions (even python versions) if need be, to isolate a project.
+
+- To list the packages that are installed >> conda list
+- To show the conda version >> conda --version
+- To update conda >> conda update conda
+- To update all the packages >> conda upgrade --all
+- To install a package, and the requiered dependencies >> conda install <package name / names>
+- To uninstall a package >> conda remove <package name>
+- To search for a package >> conda search <search term>
+- Apparently, conda redownloads packages for each environment -
+
+- Creating environments
+	
+	- conda create --name <name> <list of packages>
+	- conda create -n <name> <list of packages>
+	- A specific version of python can also be used >> conda create -n <name> python=<version>
+
+- To list the created environments >> conda env list
+
+- To enter an environment
+
+	- On Linux/MAC OS >> source activate <environment name>
+	- On Windows >> activate <environment name>
+
+- To leave an environment 
+
+	- On Linux/MAC OS >> source deactivate
+	- On Windows >> deactivate
+
+- To remove an environment >> conda env remove -n <environment name>
+
+- An environment can be saved to that it can be shared, and all the necesary packages, with the correct versions, are installed. 
+- The packages are saved to a YAML file with >> conda env export > <filename>.yaml
+- To create an environment from a file >> conda env create -f <filename>.yaml
+
+- Best practices
+
+	- Using environments for each project.
+	- Add the environment to a github repository.
+
+- Anaconda + opencv
+
+	conda create -n opencv numpy scipy scikit-learn matplotlib python=3
+	source activate opencv
+	conda install -c https://conda.binstar.org/menpo opencv3
+
+- To return to the default instalation of python, just change the path environment variable.
+
+Constraint propagation and search
+---------------------------------
+
+- Solving any sudoku puzzle.
+
+- Constraint propagation
+
+	- When trying to solve a problem, there may be some local constraints to each square. These contraints help narrow the possibilities for the answer. This technique helps to extract the maximum information out of the constraints in order to get close to the solution. Simple constraints can be iteratively applied to narrow the search space of solutions. Constraint propagation can be used to solve problems such as calendar scheduling, and cryptographic puzzles.
+	
+- Search
+
+	- If there is a point where two or more solutions are possible, we can branch and consider them all. We can continue the branching until we create a whole tree of possibilities and find ways to traverse the tree until a solution is found.
+
+- Labeling for the Sudoku solving agent. 
+
+	- Rows >> A B C D E F G H I
+	- Cols >> 1 2 3 4 5 6 7 8 9
+	- Individual squares at the intersection of rows and columns >> boxes with labels A1, I9, etc
+	- Complete rows, columns, 3x3 squares >> units; each unit is a set of 9 boxes; there are 27 units
+	- For a particular box, its peers will be all the other boxes that belong to a common unit
+
+- Strategies
+
+	- Elimination
+		If a box has a value assigned, then none of the peers of this box can have this value.
+	- Only one
+		If only one box of a unit has a possible value, it most likely is the correct option.
+	- To apply constraint propagation, it is needed to perform the elimination and only one strategies in a loop until no changes were made to the grid.
+	
+	
+
+
+
+
+
