@@ -38,10 +38,12 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
+    filled_spaces = [(i, j) for j in range(game.width) for i in range(game.height) if game._board_state[i + j * game.height] == 1]
+
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - 3 * opp_moves)
-
+    
+    return float(own_moves - 3 * opp_moves) / (len(filled_spaces) + 1)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -104,12 +106,9 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    filled_spaces = [(i, j) for j in range(game.width) for i in range(game.height) if game._board_state[i + j * game.height] == 1]
-
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    
-    return float(own_moves - 3 * opp_moves) / (len(filled_spaces) + 1)
+    return float(own_moves - 3 * opp_moves)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -174,25 +173,9 @@ class MinimaxPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
-        # Initialize the best move so that this function returns something
-        # in case the search fails due to timeout
-        best_move = (-1, -1)
-
-        try:
-            # The try/except block will automatically catch the exception
-            # raised when the timer is about to expire.
-            depth = 1
-
-            while(True):
-                best_move = self.minimax(game, depth)
-                depth += 1
-
-        except SearchTimeout as timeout:
-            return best_move # Handle any actions required after timeout as needed
-
-        # Return the best move from the last completed search iteration
-        return best_move
+        depth = 1
+        
+        return self.minimax(game, depth)
 
     def minimax_max_value(self, game, depth):
         """ Returns a candidate move with the max possible value
@@ -212,17 +195,17 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if depth == 0:
-            return ((-1, -1), self.score(game, self))
+        legal_moves = game.get_legal_moves(game.active_player)
+        max_candidate = (float("-inf"), game.get_player_location(game.active_player))
 
-        max_candidate = ((-1, -1), float("-inf"))
+        if depth == 0 or not legal_moves:
+            return (self.score(game, self), max_candidate[1])
 
-        for move in game.get_legal_moves(game.active_player):
+        for move in legal_moves:
+            score = self.minimax_min_value(game.forecast_move(move), depth -1)[0]
 
-            score = self.minimax_min_value(game.forecast_move(move), depth -1)[1]
-
-            if score > max_candidate[1]:
-                max_candidate = (move, score)
+            if score > max_candidate[0]:
+                max_candidate = (score, move)
 
         return max_candidate
 
@@ -244,17 +227,17 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        if depth == 0:
-            return ((-1, -1), self.score(game, self))
+        legal_moves = game.get_legal_moves(game.active_player)
+        min_candidate = (float("inf"), game.get_player_location(game.active_player))
 
-        min_candidate = ((-1, -1), float("inf"))
+        if depth == 0 or not legal_moves:
+            return (self.score(game, self), min_candidate[1])
 
-        for move in game.get_legal_moves(game.active_player):
+        for move in legal_moves:
+            score = self.minimax_min_value(game.forecast_move(move), depth -1)[0]
 
-            score = self.minimax_max_value(game.forecast_move(move), depth -1)[1]
-
-            if score < min_candidate[1]:
-                min_candidate = (move, score)
+            if score < min_candidate[0]:
+                min_candidate = (score, move)
 
         return min_candidate
 
@@ -297,10 +280,25 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            return (-1, -1)#game.get_player_location(game.active_player)
 
-        return self.minimax_max_value(game, depth)[0]
+        best_move = (float("-inf"), legal_moves[0])
+        best_moves = [best_move]
+
+        try:
+            depth = 1
+            while(True):
+                best_move = self.minimax_max_value(game, depth)
+                if(best_move not in best_moves):
+                    best_moves.append(best_move)
+                depth += 1
+
+        except SearchTimeout as timeout:
+            return max(best_moves)[1]
+            
+        return max(best_moves)[1]
 
 
 class AlphaBetaPlayer(IsolationPlayer):
@@ -340,22 +338,8 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
-        # Initialize the best move so that this function returns something
-        # in case the search fails due to timeout
-        
-        best_move = game.get_player_location(game.active_player)
-        try:
-            depth = 1
-
-            while(True):
-                best_move = self.alphabeta(game, depth)
-                depth += 1
-
-        except SearchTimeout as timeout:
-            return best_move
-        # Return the best move from the last completed search iteration
-        return best_move
+        depth = 1
+        return self.alphabeta(game, depth)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -402,18 +386,26 @@ class AlphaBetaPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
-
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-
         legal_moves = game.get_legal_moves()
         if not legal_moves:
-            return game.get_player_location(game.active_player)
-        
-        _, move = self.alphabeta_max_value(game, depth, alpha, beta)
+            return (-1, -1)#game.get_player_location(game.active_player)
 
-        # returns score and first visit of path
-        return move
+        best_move = (float("-inf"), legal_moves[0])
+        best_moves = [best_move]
+
+        try:
+            depth = 1
+            while(True):
+                best_move = self.alphabeta_max_value(game, depth, alpha, beta)
+                if(best_move not in best_moves):
+                    best_moves.append(best_move)
+                depth += 1
+
+        except SearchTimeout as timeout:
+            # print("Depth reached ", depth)
+            return max(best_moves)[1]
+        # Return the best move from the last completed search iteration
+        return max(best_moves)[1]
 
     def alphabeta_max_value(self, game, depth, alpha, beta):
         """ Returns a candidate move with the max possible value
@@ -470,8 +462,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        min_candidate = (float("inf"), game.get_player_location(game.active_player))
         legal_moves = game.get_legal_moves(game.active_player)
+        min_candidate = (float("inf"), game.get_player_location(game.active_player))
 
         if depth == 0 or not legal_moves:
             return (self.score(game, self), min_candidate[1])
