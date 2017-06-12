@@ -39,7 +39,7 @@ Anaconda
 
 - To remove an environment >> conda env remove -n <environment name>
 
-- An environment can be saved to that it can be shared, and all the necesary packages, with the correct versions, are installed. 
+- An environment can be saved so that it can be shared, and all the necesary packages, with the correct versions, are installed. 
 - The packages are saved to a YAML file with >> conda env export > <filename>.yaml
 - To create an environment from a file >> conda env create -f <filename>.yaml
 
@@ -85,9 +85,143 @@ Constraint propagation and search
 		If only one box of a unit has a possible value, it most likely is the correct option.
 	- To apply constraint propagation, it is needed to perform the elimination and only one strategies in a loop until no changes were made to the grid.
 	
+
+Heuristics
+-----------
+
+- Some additional piece of information - a rule, function, or constraint - that informs an otherwise brute-force algorithm to act in a more optimal manner.
+
+Search 
+----------
+
+- Used, for example, in Navigation.
+
+- Pruning the search tree with an heuristic makes it so that certain options of the search tree are not considered since they do not contribute to a specific goal.
+
+- Adversarial search
+	- Mini-max algorithm: You are trying to maximize your chances of winning on your turn, and your opponent is trying to minimize your chances of winning on their turn.
+
+- A* search
+
+Intelligent systems
+-------------------
+
+- Environment is where agents perform actions.
+	- Can be:
+		- Fully or partially observable.
+		- Deterministic (know for sure about the results of each action) or stochastic (thre is some uncertainty in the actions).
+		- Discrete (finite number of states) or continuous (infinit number of states).
+		- Benign (only the agent is taking actions that affect its goal) or adversarial (one or more agents that try to defeat its goal)
 	
+- State: Represent only the elements relevant to solving a problem
+	- Goal state
+	
+- An agent interacts with the environments by sensing its properties using sensores, this is called Perception. An agent produces useful output, or actions, that typically change the state of the environment. The proces with which an agent takes a desicion based on its perception is called cognition.
 
+- An intelligent agent is one that takes actions to maximize its expected utility given a desired goal. This is called rational behavior. This expects the agents to perform optimally, which may not be possible due to several constraints: partially observable environment, limited computational resources, rules implied by the task, etc. We can come up with a level of performance or bound that we want the agent to meet (for example, 60% win rate in chess); this is known as bounded optimallity. With bounded optimality we can expect the agent to not operate optimally, but still serves as a practical way of quantifing and measuring 
 
+Game playing
+------------
+
+- Adversarial Search (Supplemental material: AI A modern approach, section 5.1, 5.2)
+
+	- Competitive environments in which agents' goals are in conflict. Adversarial search, also known as games.
+	- Optimal move and algorithms to finding it.
+	- Pruning allows us to ignore portions of the search tree that make no difference to the final choice.
+	- Heuristic evaluation functions allow us to approximate the true utility of a state without doing a complete search.
+	- A game can be defined as a kind of search problem with the following elements:
+		- So: 				Initial state, specifies how the game is set up at the start.
+		- Players(s): 		Defines which player has the move in a state.
+		- Actions(s):		Returns the set of legal moves in a state.
+		- Results(s, a):	The transition model, which defines the result of a move (action).
+		- Terminal-Test(s):	True when the game is over, false otherwise. Terminal states are states where the game ended.
+		- Utility(s, p):	Utility function that defines the final numeric value for a game that ends in terminal state for player p.
+	- A zero-sum game is defined as one where the total payoff to all players is the same for every instance of the game.
+	- The initial state, actions function, and results functions define the game tree for the game -- a tree where the nodes are game states and the edges are moves.
+	- Multiplayer games usually involve alliances, wheter formal or informal, among players.
+	- If the game is not zero-sum, then collaboration can also occur with just two players. For example, consider that there is a terminal state with utilities. Then the optimal strategy is for both players to do everything possible to reach that state -- that is, the players will automatically cooperate to achieve a mutually desirable goal.
+	
+- Mini-max algorithm
+
+	- Consider games with two players: Max and Min.
+		- Max moves first, and then they take turns until the game is over.
+	- Once we have a game tree, we label each terminal node with a value for a loss or for a win. We can then mark each tree node with a triangle: pointing up to indicate that the agent is trying to maximize its scores, making it a maximize node; pointing down when the opponent is trying to minimize the score, making it a minimize node.
+	- For each max node, pick the maximum value among its child nodes.
+	- For each min node, pick the minimum value amont its child nodes.
+	- Given a game tree, the optimal srategy can be determined from the minimax value of each node, which is written as Minimax(n).
+	- The minimax algorithm performs a complete depth-first exploration of the game tree. If the maximum depth of the tree is d and there are b level moves at each point, then the time complexity of the minimax algorithm is O(b^d). Although intractable due to time costs, this algorithm serves as a basis for the mathematical analysis of games and for more practical algoritms.
+
+- Isolation game
+
+	- Two players have a piece that they have to move in a squared board with several boxes. Both players can start where they want. After the initial placement, players can move the piece like a queen in chess: horizontally, vertically, and diagonally. When moving the piece, players can not move through the other player's piece, or through boxes that have already been occupied.
+	- When a player moves, only the box where the player moved is marked as occupied, not the boxes traversed.
+	- The objective is to be the last player to move, thus, the objective is to isolate the other player.
+	- Branching factor: The fact that after a game progresses, there may be a more reduced number of possible moves than originally expected. Since in isolation from the third move you can move only as a queen in chess would move, the maximum number of places to go, assuming you are at the center, is 16. Generally, this is 12. 
+	
+	- Depth Limited Search: Limit the search space to a determined point to choose a move quickly. In this case, limit the depth of a search tree.
+	
+	- Quiescent Search: When the recommended branches are not changing much, so it is an indication that the choice may be a good one.
+		- A problem that may arise is that you sometimes have to search several more levels if the results change too much between levels.
+	
+	- Iterative deepening: Doing a search and evaluating at each level (propagating the evaluation to all the levels), storing the result. If there is time remaining to make a choice, continue to the next level, and reevaluate the recommended solution. Quiescence is an ideal result, although not always the case.
+		- Each iteration, we evaluate the tree up to a certain level, but with each level added, we need to revisit and reevaluate nodes. The nodes visited at each level is: 
+		n = (b ^ (d+1) - 1) / (b - 1), where b is the branching factor, and d is the depth. The iterative deepening nodes are a sum of the visited tree nodes.
+		- For some problems, iterative deepening is almost free because of the exponential level of the problem: you evaluate less nodes than the total amount of nodes you would have had to evaluate.
+		- We can create strategies for how deep we want to search, depending on the game, and its state.
+		- Horizon effect: when it is obvious to a human player that the game will be decided in the next move, but the computer can not search deep enough into the future to figure out the problem.
+		
+	- Evaluation functions play a key role in the game, and several can be tested to improve the performance.
+	
+	
+- Alpha-beta pruning (Supplemental material: AI A modern approach, section 5.3)
+
+	- Allows us to ignore whole sections of the game tree, and still get the same results as minimax.
+	- A better explanation of the steps for the algorithm can be found in the book, Figure 5.5. 
+	- Minimax with alpha-beta pruning, when successors are examined in random order rather than best-first, has a complexity of O(b^(3d/4)). For best-first, it has a complexity of O(b^(d/2))
+	- The effectiveness of alpha-beta pruning is higly dependent on the order in which the states are examined.
+	- Adding dynamic move-ordering schemes, such as trying first the moves that were found to be best in the past (could be the previous move, or could come from previous exploration of the current move), brings us quite close to the theoretical limit ( O(b^(d/2)) ).
+	- Although the alpha-beta allows the pruning of large parts of a search tree, it still has to search all the way to terminal states for at least a portion of the search space. It was proposed insted to use heuristic evaluation functions to cut off the search earlier, effectively turning nonterminal nodes into terminal leaves.
+		- This means that the utility function is replaced by a heuristic evaluation function EVAL, which estimates the position's utility, and replace the terminal test by a cutoff test that decided when to apply EVAL.
+	- Strategies to reduce the game space: Partition, simetry, alpha-beta, hash table of good opening moves, reflecting moves.
+	
+	- Evaluation functions (Supplemental material: AI A modern approach, section 5.4)
+		
+		- An evaluation function returns an estimate of the expected utility of the game from a given position. The performance of a game-playing program depends on the quality of its evaluation function, which makes its crucial to define good evaluation functions:
+			- First, evaluation functions should order the terminal states in the same way as the true utility function: states that are wins must evaluate better than draws, which in turn must evaluate better than losses. 
+			- Second, the evaluation function must not take too long. 
+			- Third, for the nonterminal states, the evaluation function should be strongly correlated wih the actual chances of winning. Chances of winning: if the search must be cut off at nonterminal states, the algorithm will necessarily be uncertain about the final outcomes of those states.
+		- Most evaluation functions work by calculating various features of the state: pieces on the board, types of pieces, moves, spaces, etc. 
+		- The features, taken together, define categories or equivalence classes of states: the states in each category have the same values for all the features.
+			- In practice, this kind of analysis requires too many categories and too much experience to estimate the probabilities of winning.
+		- Most evaluation functions compute separate numerical contributions from each feature and then combine them to find the total value. This kind of evaluation function is called weighted linear function and can be expressed as:
+			EVAL(s) =  sum_{i=1}^{n} wi fi(s)
+		where wi is a weight and fi is a feature of the position. this assumes that each feature is independent of the values of other features. For example, assigning the value 3 to a bishop in chess ignores the fact that bishops are more powerful in the endgame, when they have more space to maneuver. This is why some games use nonlinear combinations of features.
+		
+	- Cutting off search (Supplemental material: AI A modern approach, section 5.4.2)
+	
+		- The next step is to modify ALPHA-BETA-SEARCH so that it will call the heuristic EVAL function when it is appropriate to cut off the search. 
+		- The evaluation function should be applied only to positions that are quiescenet -- that is, unlikely to exhibit wild swings in value in the near future.
+		- Horizon effect: It arises when the program is facing an opponent's move that causes serious damage and is ultimately unavoidable, but can be temporarily avoided by delaying tactics. 
+			- One strategy to mitigate this effect is the singular extension, a move that is "clearly better" than all other moves in a given position. Once discovered anywhere in the tree in the course of a search, this singular move is remembered. When the search reaches the normal depth limit, the algorithm checks to see if the singular extension is a legal move; if it is, the algorithm allows the move to be considered.
+	
+	- Forward prunning
+	
+		- Some moves at a given node are pruned immediately without further consideration. 
+		- Beam serach: on each level, consider a "beam" of the n best moves (according to the evaluation function) rather than considering all possible moves. This approach does not guarantee that the best move will not be pruned.
+		- The probabilistic cut (probcut) is a forward-prunning version of alpha-beta search that uses statistics gained from prior experience to lessen the chance that the best move will be pruned.
+		
+- Isolation game evaluation heuristics
+
+	In order to evaluate the utility of a non-leaf node in the tree, we used a combination of the number of free spaces on the board and the number of legal moves available to each player. The number of free spaces on that board gives an indication of how much of the board is filled up. It is not always necessary that the legal moves would cover every square on the board and this metric is used to find how “isolated” a player is and whether there is opportunity to move to a more open area. The number of legal moves available to each player are used to not only maximize the possibilities of oneself, but also minimize the possibilities for others. The agents used (number of current player’s moves - number of enemy’s moves)/(num empty spaces +1). 
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 

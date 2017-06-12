@@ -43,6 +43,7 @@ class sudoku_solver():
         self.col_units = [cross(self.rows, c) for c in self.cols]
         self.square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
 
+        # To solve a diagonal sudoku, it is only needed to consider the diagonals as units.
         if diagonal:
             # To generate the diagonals, it is only needed to append the rows and
             # columns one by one, not crossing them. The left diagonal uses the
@@ -77,33 +78,11 @@ class sudoku_solver():
         Returns:
             values(dict):   Sudoku in dictonary form after removing values.
         """
-        # Solution 2; with the peers dictionary
         solved_boxes = [box for box in self.boxes if len(values[box]) == 1]
         for box in solved_boxes:
             for peer in self.peers[box]:
                 self.assign_value(values, peer, values[peer].replace(values[box], ''))
                 # values[peer] = values[peer].replace(values[box], '')
-        return values
-
-        # Solution 1; without the peers dictionary
-        # solved_boxes = [box for box in self.boxes if len(values_dictionary[box]) == 1]
-        # for box in solved_boxes:
-        #     for unit in self.units[box]:
-        #         for unit_value in unit:
-        #             if len(values_dictionary[unit_value]) > 1:
-        #                 if unit_value != box:
-        #                     values_dictionary[unit_value] = values_dictionary[unit_value].replace(values_dictionary[box], "")
-
-        # # # With this code it removes additional possible values if a solution has been found
-        # # for box_key, box_value in values_dictionary.items():
-        # #     if len(box_value) > 1:
-        # #         This goes through all the peers
-        # #         for unit in self.unit_list:
-        # #             if box_key in unit:
-        # #                 for unit_value in unit:
-        # #                     if len(values_dictionary[unit_value]) == 1:
-        # #                         if unit_value != box_key:
-        # #                             values_dictionary[box_key] = values_dictionary[box_key].replace(values_dictionary[unit_value], "")
         return values
 
     def only_choice(self, values):
@@ -256,5 +235,3 @@ if __name__ == '__main__':
         pass
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
-
-
