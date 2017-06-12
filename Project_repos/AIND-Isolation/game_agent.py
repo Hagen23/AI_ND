@@ -8,7 +8,7 @@ class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
 
-def final_heuristic(game, player):
+def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
@@ -117,39 +117,6 @@ def custom_score_3(game, player):
         return float(own_moves - 3 * opp_moves)
     # return float(own_moves - 3 * opp_moves) * (len(filled_spaces) - len(game.get_blank_spaces()) + 1)
 
-def custom_score(game, player, startfactor=2, factor=3):
-    """
-        Return a score for game and player based on the stage of the game, my moves,
-        oponent moves (with weight) and moves targeting the center of the board.
-        :param game:
-        :param player:
-        :param startfactor: move quantity threshold for center opening
-        :param factor: opponent moves weight
-        :return:
-        """
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    if (game.move_count < factor):
-        location = game.get_player_location(player)
-        opponent_moves = game.get_legal_moves(game.get_opponent(player))
-
-        if (location[0] >= 2 and location[0] < game.height - 2) and\
-            (location[1] >= 2 and location[1] < game.width - 2):
-            return float(100 - len(opponent_moves))
-        else:
-            my_moves = game.get_legal_moves(player)
-
-            return float(len(my_moves) + factor*len(opponent_moves))
-    else:
-        my_moves = game.get_legal_moves(player)
-        opponent_moves = game.get_legal_moves(game.get_opponent(player))
-
-        return float(len(my_moves) + factor*len(opponent_moves))
-
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
     constructed or tested directly.
@@ -172,7 +139,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
-    def __init__(self, search_depth=3, score_fn=final_heuristic, timeout=10.):
+    def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
@@ -472,8 +439,8 @@ class AlphaBetaPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        max_candidate = (float("-inf"), game.get_player_location(game.active_player))
         legal_moves = game.get_legal_moves(game.active_player)
+        max_candidate = (float("-inf"), game.get_player_location(game.active_player))
 
         if depth == 0 or not legal_moves:
             return (self.score(game, self), max_candidate[1])
