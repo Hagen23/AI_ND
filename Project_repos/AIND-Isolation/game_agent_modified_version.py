@@ -1,3 +1,5 @@
+### The following code does not pass the UDACITY-PA tests because I implemented the iterative search differently and within the minimax and alphabeta respectively, instead of within get move. Also, I addressed an issue with forfeiting by keeping a list of values and moves at the iterative deepening, and selecting the best move from that list.
+
 """Finish all TODO items in this file to complete the isolation project, then
 test your agent's strength against a set of known agents using tournament.py
 and include the results in your report.
@@ -42,7 +44,7 @@ def custom_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-
+    
     return float(own_moves - 3 * opp_moves) * (len(filled_spaces) + 1)
 
 def custom_score_2(game, player):
@@ -173,25 +175,9 @@ class MinimaxPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-
-        legal_moves = game.get_legal_moves()
-        if not legal_moves:
-            return (-1, -1)
-
-        best_move = legal_moves[0]
-
-        try:
-            depth = 1
-            while True:
-                move = self.minimax(game, depth)
-                if move != (-1, -1):
-                    best_move = move
-                depth += 1
-
-        except SearchTimeout:
-            return best_move
-
-        return best_move
+        depth = 1
+        
+        return self.minimax(game, depth)
 
     def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
@@ -232,11 +218,25 @@ class MinimaxPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            return (-1, -1)#game.get_player_location(game.active_player)
 
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
+        best_move = (float("-inf"), legal_moves[0])
+        best_moves = [best_move]
 
-        return self.minimax_max_value(game, depth)[1]
+        try:
+            depth = 1
+            while(True):
+                best_move = self.minimax_max_value(game, depth)
+                if(best_move not in best_moves):
+                    best_moves.append(best_move)
+                depth += 1
+
+        except SearchTimeout as timeout:
+            return max(best_moves)[1]
+            
+        return max(best_moves)[1]
 
     def minimax_max_value(self, game, depth):
         """ Returns a candidate move with the max possible value
@@ -295,12 +295,14 @@ class MinimaxPlayer(IsolationPlayer):
             return (self.score(game, self), min_candidate[1])
 
         for move in legal_moves:
-            score = self.minimax_max_value(game.forecast_move(move), depth -1)[0]
+            score = self.minimax_min_value(game.forecast_move(move), depth -1)[0]
 
             if score < min_candidate[0]:
                 min_candidate = (score, move)
 
         return min_candidate
+
+    
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
@@ -338,27 +340,9 @@ class AlphaBetaPlayer(IsolationPlayer):
             Board coordinates corresponding to a legal move; may return
             (-1, -1) if there are no available legal moves.
         """
-
         self.time_left = time_left
-
-        legal_moves = game.get_legal_moves()
-        if not legal_moves:
-            return (-1, -1)
-
-        best_move = legal_moves[0]
-
-        try:
-            depth = 1
-            while True:
-                move = self.alphabeta(game, depth)
-                if move != (-1, -1):
-                    best_move = move
-                depth += 1
-
-        except SearchTimeout:
-            return best_move
-
-        return best_move
+        depth = 1
+        return self.alphabeta(game, depth)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
@@ -405,12 +389,26 @@ class AlphaBetaPlayer(IsolationPlayer):
                 each helper function or else your agent will timeout during
                 testing.
         """
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            return (-1, -1)#game.get_player_location(game.active_player)
 
-        _, move = self.alphabeta_max_value(game, depth, alpha, beta)
+        best_move = (float("-inf"), legal_moves[0])
+        best_moves = [best_move]
 
-        return move
+        try:
+            depth = 1
+            while(True):
+                best_move = self.alphabeta_max_value(game, depth, alpha, beta)
+                if(best_move not in best_moves):
+                    best_moves.append(best_move)
+                depth += 1
+
+        except SearchTimeout as timeout:
+            # print("Depth reached ", depth)
+            return max(best_moves)[1]
+        # Return the best move from the last completed search iteration
+        return max(best_moves)[1]
 
     def alphabeta_max_value(self, game, depth, alpha, beta):
         """ Returns a candidate move with the max possible value
@@ -450,8 +448,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         return max_candidate
 
     def alphabeta_min_value(self, game, depth, alpha, beta):
-        """ Returns a candidate move with the min possible value.
-
+        """ Returns a candidate move with the min possible value. 
             Parameters:
             ----------
                 game: isolation.Board
