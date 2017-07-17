@@ -213,8 +213,171 @@ Game playing
 - Isolation game evaluation heuristics
 
 	In order to evaluate the utility of a non-leaf node in the tree, we used a combination of the number of free spaces on the board and the number of legal moves available to each player. The number of free spaces on that board gives an indication of how much of the board is filled up. It is not always necessary that the legal moves would cover every square on the board and this metric is used to find how “isolated” a player is and whether there is opportunity to move to a more open area. The number of legal moves available to each player are used to not only maximize the possibilities of oneself, but also minimize the possibilities for others. The agents used (number of current player’s moves - number of enemy’s moves)/(num empty spaces +1). 
+
+Problem Solving
+---------------
+Search
+------
+
+The theory and technology of building agents that can plan ahead to solve problems.
+
+- Definition of a problem
+
+	- Initial state of the problem s_0
+	- Possible actions that an agent can take on a given state {a_1, a_2, ... }
+	- Result function (s, a) which returns a new state s' = (s, a)
+	- Function goalTest (s) returns a bool, tests if a given state is the goal of the problem
+	- Path Cost function which takes a path (sequence of state action transitions) and returns a number, which is the cost of the path. Most functions are additive, which means the cost of a path is the sum of the cost of individual steps.
+	- Step cost function, takes a state, and action, and a resulting state, and returns a number n, which is the cost of that step.
+
+	- The state space are all the possible states, and it can be navigated by applying actions.
+	- At every point we want to separate the state out into three parts: The frontier is the end state of the paths that have been explored, the previous states are the explored states of the state space, and the other states are the unexplored part of the state space.
+
+- Breadth-First Search 
 	
+	- Shortest First Search: always choose from the frontier one of the paths that has not been considered yet, which is the shortest. So fat, shortest has meant the one that has the fewer steps, not necessarily the least cost.
 	
+- Uniform cost Search
+
+	- Breath-first search but expands considering the lowest cost path, instead of the path with the least states.
+
+- Greedy best-first search
+	- A* algorithm: Expanding the path that has the minimum value for the funciton f = g + h; where g(path) = path cost, h(path) = h(s) = estimated distance to the goal (heuristic estimate function)
+	- A* will find the lowest cost path if the h function for a state is less than the true cost of the path to the goal through that state. H should never overestimate the distance to the goal. H is optimistic; h is admissible to find the lowest cost path.
+	- The "intelligent" part of a problem is the definition of the heuristic function, which is normally provided. The idea is to automatically come up with good heuristics given the definition of a problem.
+	- By generating a relaxed problem (removing constraints of a problem) we can derive admissible candidate heuristics. To come up with a good heuristic, we can say that h = max(h1, h2, ..., hn), which never overestimates and is guaranteed to be better because it is getting closer to the target. The problem is that there is a cost to compute the heuristic, which can be longer to compute even if in the end fewer paths are expanded.		
+	
+- Completeness: If there is a goal, an algorithm finds a path to that goal.
+	- Breath first and cheapest first are complete. Depth first is not; if there is an infinite path it may not get to the path with the goal.
+
+- Search works when
+	- The space is fully observable: Must be able to see what initial state we start out with.
+	- Known: Must know the set of available actions.
+	- Discrete: Must be a finite number of actions to choose from.
+	- Deterministic: Must know the results of taking an action.
+	- Static: Must be nothing else than can change the world other than our own actions.
+	
+- Implementation details
+	- Data structure for the paths: Node
+		- Current state (state at the end of the path)
+		- Action it took to get there
+		- Total cost
+		- Pointer to the parent
+	- A path can be a linked list of Nodes
+	- The frontier
+		- Operations
+			- Remove best items
+			- Add in new ones
+			- Membership test
+		- Implementation
+			- Priority queue
+		- Representation
+			- Set
+		- Build
+			- Hash table
+			- Tree
+	- Explored
+		- Operations
+			- Add new members
+			- Check for membership
+		- Representation
+			- Single set
+		- Build
+			- Hash table
+			- Tree
+
+
+- Simulated Annealing
+
+	- For problems where it is not that easy to find a solution, such as where the state space is very large.
+	- There are a whole class of problems where just a little bit of intelligence and iteratively improving the solution gets you very close to an optimal solution. Iteratevely improving algorithms (random restart, genetic algorithms, simulated annealing), An element of randomness is what you need! All these algorithms take a randomized approach, and thus avoid getting stuck in local minima.
+	- Random restart: restart at different points, try to sole the problem, and return the best solution of each iteration.
+		- As the number of iterations goes to infinity, it should find the best solution. A taboo search avoids places you have already been to by storing the places you have been to and restarting if you get to the same place. Another approach would be to store all the local maximums, and try to estimate where the next one might be.
+		- Special attention has to be taken for the step size: too small and it might return before a considerable change is found, too large, and it might miss possible solutions.
+	- Local beam search, instead of using only one particle, we use k-particles, and on each iteration, the information of the neighbors is also considered to point to the solution. Stochastical beam search.
+	- Genetic algorithms. These use mutation and breeding to find a solution.
+	
+- Constraint satisfaction problems
+
+	- Variables, domains, constraints
+	
+- Logic and planning
+
+	- Propositional Logic
+		- True, false, or unknown facts
+		- v: or
+		- >: implies (if p then q)
+		- ^: and
+		- <>: bidirectional implies
+		- ¬: not
+		- Valid: Always true, Satisfiable: sometimes tru, unsatisfiable: never true
+
+	- First order logic
+		- True, false, or unknown relationships about things in the world
+		- Models that define the world are more complex, consisting on a set of objects, constants (made up of references to objects), functions which are mappings of objects to other objects, and sets of relations between objects. Every model has to have at least one object.
+		- Satisfiability is that it can be true in some models, not true in all models.
+		- Syntax
+			- Sentences: describe facts that are true of false. The operators of propositional logic can be applied to sentences. Additionally, there is an equality relationship.
+			- Terms: describe objects. Can be constants, variables, and functions.
+			- Quantifiers: For all, and there exists. If the quantifier is ommited, it is assumed that it is the for all quantifier.
+		
+	- Probability theory
+		- Facts in the range of [0...1]
+		
+- Planning Search
+
+	- Problem solving does all the planning work first, before executing the plan.
+	- For planning we need feedback from the environment, we need to interleave planning with execution.
+	- Because of properties of the environment that make it difficult to deal with. 
+		- Most important one is if the environment is stochastic: We do not know for sure what an action is going to do; we have do deal with contingencies. With stichastic worlds we can have a next state space with more states than before.
+			- In stochastic partially observable environments, the actions tend to increase uncertainty and the observations tend to bring that uncertainty back down.
+		- Multiagent systems.
+		- Partial observability: we dont know what stage we are in, until we are there to ask the state.
+		- Basically, lack of knowledge.
+		- Hierarchical plans.
+		- To counter these, we have to plan with belief states. 
+	- Belief states. 
+		- We start in a space that can contain all other possible states, and by executing actions, we gain knowledge of the world and the possible states we are in.
+		- It is possible to form a plan without ever having had to sense the world: Conformant plans.
+		- Local sensing: Can see what location it is in, can see what is going on in the current location.
+		- In the end, it was all state machines...
+		- To find a successful plan, we can still use search, only the tree is more complicated.
+
+	- Classical planning
+		- Planning Domain definition language: Describes the four things we need to define a search problem
+			- Initial state
+			- The actions that are available in a state
+			- The result of applying an action
+			- The goal test
+		- Each state is represented as a conjunction of fluents that are gound (can not be arbitrary variables; variable-free), functionless atoms.
+		- Actions are represented by action schemas.
+		- state space: all possible assignments to k-boolean variables, so there will be 2^k states in the state space
+		- World state: complete assignment of true or false to each variable.
+		- Belief state: complete assignments, partial assignments, arbitrary formula
+		- action schema: represents many similar actions that are similar to each other. 
+			- Action(Fly(p, from, to)
+				Preconditions: Plane(p) ^ Airport(from) ^ Airport(to) ^ At(p,from)
+				Effect: ¬At(p, from) ^ At(p, to))
+			- It represents a set of actions for all planes, all from's and to's, it also says what we need to know to take that action and the effect of taking that action.
+			- Actions schemas help to create good heurists by relaxing (removing) certain preconditions or effects.
+			
+		- Planning algorithms
+			- Forward search: Regular search algorithm that starts at the initial state. However, forward state-space search is too inefficient to be practical for planning: It is prone to exploring irrelevant actions, and planning problems often have large state spaces.
+			- Backward (regression) relevant-states search: In regression search we start at the goal and apply the actions backward until we find a sequence of steps that reaches the initial state. It is called relevant-states search because we only consider actions that are relevant to the goal (or current state). As in belief-state search, there is a set of relevant states to consider at each step, not just a single state.
+			- Backward search works only when we know how to regress from a state description to the predecessor state description. The PDDL representation was designed to make it easy to regress actions.
+			- Given a ground goal description g and a ground action a, the regression from g over a gives us a state description g' defined by:
+			g' = (g - ADD(a)) U Precond(a)
+			- That is, the effect that were added by the action need not have been true before, and also the preconditions must have held before, or else the action could not have been executed.
+			- In forward direction we choose action that were applicable-those actions that could be the next step in the plan. In backward search we want actions that are relevant-those actions that could be the last step in a plan leading up to the current goal state.
+		
+		
+		- Heuristisc for planning
+			- An admisible heuristic can be derived by defining a relaxed problem that is easier to solve. The exact cost f a solution to this easier problem then becomes the heuristic for the original problem.
+			- An example would be the ignore predonditions heuristic drops all preconditions from actions.
+				- First, we relax the actions by removing all preconditions and all effects except those that are literals in the goal. Then, we count the minimum number of actions required such that the union of those actions' effects satisfies the goal. This is an instance of the NP-hard set-cover problem.
+			- It is also possible to ignore only selected preconditions of actions.
+			
+		
 	
 	
 	
