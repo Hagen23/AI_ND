@@ -377,6 +377,44 @@ The theory and technology of building agents that can plan ahead to solve proble
 				- First, we relax the actions by removing all preconditions and all effects except those that are literals in the goal. Then, we count the minimum number of actions required such that the union of those actions' effects satisfies the goal. This is an instance of the NP-hard set-cover problem.
 			- It is also possible to ignore only selected preconditions of actions.
 			
+----------------------------
+
+Probability
+----------
+
+Challenge question:
+
+3% of the population has X disease. A drug Y can detect it but not with 100% accuracy. If a person has X, there is a 1% chance that it will go undetected. There is also a 10% chance of false alarms. If A takes Y which returns positive, what is the probability of adam having the disease?
+
+P(X) = 0.03 -> 3% of the population has X disease
+p(~Y/X) = 0.01 -> if a person has X, there is a 1% chance it will go undetected
+p(Y/~X) = 0.10 -> 10% chance of false positive
+
+p(X/Y) = P(Y/X) P(X) / P(Y) -> Bayes rule
+
+P(Y/X) = 1 - P(~Y/X) = 0.99
+P(Y) = P(Y/X)P(X) + P(Y/~X)P(~X) -> Probability of Y is equals to the probability of Y happening within a population plus the probability of Y happening outside the population. That is why P(Y/X) is multiplied by P(X); P(Y/X) is the chance of Y happening, and P(X) is the chance of it happening in the population. The same case applies for the other factor in the equation.
+P(Y) = 0.99 * 0.03 + 0.1 * 0.97 = 0.1267
+
+P(X/Y) = 0.99 * 0.03 / 0.1267 = 0.234
+
+- Intro to probability and bayes networks
+
+	- Bayes Networks: A Bayesian network, Bayes network, belief network, Bayes(ian) model or probabilistic directed acyclic graphical model is a probabilistic graphical model (a type of statistical model) that represents a set of random variables and their conditional dependencies via a directed acyclic graph (DAG).
+	- Complementary probability: P(A) = p -> P(¬A) = 1 - p
+	- Independence (unicode character ⊥ = u+22a5): X⊥Y : P(X)P(Y) --marginals-- = P(x, Y) --joint probability--
+	- Dependence: P(X | Y) -> Probability of X given that Y happened
+	- Total probability (unicode character ∑ a+2211): P(Y) = ∑_i P(Y|X = i) P(X=i)
+	- P(¬X|Y) = 1 - P(X|Y) NOTE: P(X|¬Y) != 1 - P(X|Y)
+	- P(X, Y)  = P(Y) P(X|Y)
+	- Conditional Independence: Knowing anything about a world T1 would not help make a statement about another world T2, given that we know the value of C. P(T2|C,T1) = P(T2|C)
+	
+	- Bayes rule
+	
+		- P(A|B) = P(B|A) P(A) / P(B)
+		- PB = P(B|A) P(A) + P(B|¬A) P(¬A)
+
+			
 		
 	
 	
