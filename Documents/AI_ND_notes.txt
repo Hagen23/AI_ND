@@ -401,19 +401,38 @@ P(X/Y) = 0.99 * 0.03 / 0.1267 = 0.234
 - Intro to probability and bayes networks
 
 	- Bayes Networks: A Bayesian network, Bayes network, belief network, Bayes(ian) model or probabilistic directed acyclic graphical model is a probabilistic graphical model (a type of statistical model) that represents a set of random variables and their conditional dependencies via a directed acyclic graph (DAG).
+	
 	- Complementary probability: P(A) = p -> P(¬A) = 1 - p
+	
 	- Independence (unicode character ⊥ = u+22a5): X⊥Y : P(X)P(Y) --marginals-- = P(x, Y) --joint probability--
-	- Dependence: P(X | Y) -> Probability of X given that Y happened
-	- Total probability (unicode character ∑ a+2211): P(Y) = ∑_i P(Y|X = i) P(X=i)
+	
+	- Joint probability of independent variables: P(X,Y) = P(X) P (Y)
+	
+	- Joint probability of dependent variables: P(X,Y) = P(Y|X) P(X) = P(X|Y) P(Y) ( https://www.khanacademy.org/math/statistics-probability/probability-library/conditional-probability-independence/v/calculating-conditional-probability ; https://en.wikipedia.org/wiki/Joint_probability_distribution )
+	
+	- Dependence: P(X | Y) -> Probability of X given that Y happened: 
+	When two events, A and B, are dependent, the probability of both occurring is: P(A, B) = P(A) P(B|A)
+	
+	- Conditional probability: P(A|B) = P(A,B) / P(B) 
+	
+	- Total probability (unicode character ∑ a+2211): P(Y) = ∑_i P(Y|X = i) P(X=i), or, equivalently, ∑_i P(A) = P(A, B_i)
+	
 	- P(¬X|Y) = 1 - P(X|Y) NOTE: P(X|¬Y) != 1 - P(X|Y)
-	- P(X, Y)  = P(Y) P(X|Y)
-	- Conditional Independence: Knowing anything about a world T1 would not help make a statement about another world T2, given that we know the value of C. P(T2|C,T1) = P(T2|C)
+		
+	- Conditional Independence: Knowing anything about a world T1 would not help make a statement about another world T2, given that we know the value of C. P(T2|C,T1) = P(T2|C).
+	In probability theory, two events R and B are conditionally independent given a third event Y precisely if the occurrence of R and 		the occurrence of B are independent events in their conditional probability distribution given Y. In other words, R and B are 		conditionally independent given Y if and only if, given knowledge that Y occurs, knowledge of whether R occurs provides no 		information on the likelihood of B occurring, and knowledge of whether B occurs provides no information on the likelihood of R 		occurring.
+	P(R, B|Y) = P(R|Y)P(B|Y) or, equivalently, P(R|B,Y) = P(R|Y)
 	
 	- Bayes rule
 	
 		- P(A|B) = P(B|A) P(A) / P(B)
-		- PB = P(B|A) P(A) + P(B|¬A) P(¬A)
-
+		- P(B) = P(B|A) P(A) + P(B|¬A) P(¬A)
+			- P(A|B) + P(¬A|B) = 1
+			- P(A|B) = P(B|A) P(A) / P(B)
+			- P(¬A|B) = P(B|¬A) P(¬A) / P(B)
+			- P(B|A) P(A) / P(B) + P(B|¬A) P(¬A) / P(B) = 1
+			- P(B) = P(B|A) P(A) + P(B|¬A) P(¬A)
+	
 			
 		
 	
